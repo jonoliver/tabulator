@@ -1,3 +1,6 @@
+:root {
+  --spacing: 5rem;
+}
 html,
 body {
   padding: 0;

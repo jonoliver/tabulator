@@ -1,0 +1,30 @@
+.riff {
+  display: grid;
+  grid-auto-flow: row;
+  grid-auto-rows: calc(var(--spacing) * 0.6);
+}
+
+.string {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: var(--spacing);
+  align-items: center;
+  background: linear-gradient(0deg, #FFF 49%, #000 50%, #FFF 51%);
+}
+
+.fret {
+  text-align: center;
+}
+
+.empty {
+  background: #ccc;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 1rem;
+  margin: auto;
+}
+
+.number {
+  background: #FFF;
+  padding: 0.5rem;
+}
