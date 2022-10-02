@@ -48,6 +48,8 @@ const mockState: Riff = {
   ]
 }
 
+const buildClasses = (list: unknown[]) => list.filter(Boolean).join(' ');
+
 type ShowProps = {
   when: boolean,
   children: JSX.Element,
@@ -61,15 +63,13 @@ type NoteProps = {
 
 const Note = ({ note, setNote }: NoteProps) => {
   const hasNote = note.number !== undefined;
-  const noteClassNames = [styles.fret, !hasNote && styles.empty].filter(Boolean).join(' ');
+  const noteClassNames = buildClasses([styles.fret, !hasNote && styles.empty]);
   return (
     <div
       className={noteClassNames}
       onClick={setNote}
     >
-      <Show when={hasNote}>
-        <span className={styles.number}>{note.number}</span>
-      </Show>
+      <span className={styles.number}>{note.number}</span>
     </div>
   )
 }
@@ -102,14 +102,18 @@ const Riff = () => {
         </div>
       )
     }
-    <input
-      type="number"
-      min="0"
-      max="25"
-      style={{ width: '5rem', padding: '0.5rem', paddingRight: '0', margin: 'auto' }}
-      value={pasteValue}
-      onChange={(e) => setPasteValue(parseInt(e.target.value, 10))}
-    />
+    <form
+      onSubmit={(e) => e.preventDefault()}
+    >
+      <input
+        type="number"
+        min="0"
+        max="25"
+        style={{ width: '5rem', padding: '0.5rem', paddingRight: '0', margin: 'auto' }}
+        value={pasteValue}
+        onChange={(e) => setPasteValue(parseInt(e.target.value, 10))}
+      />
+    </form>
   </div>
 }
 
