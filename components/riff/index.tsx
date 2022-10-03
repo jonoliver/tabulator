@@ -20,32 +20,12 @@ type Riff = {
 };
 
 const mockState: Riff = {
-  strungs: [
-    {
-      id: 'string-1',
-      notes: [
-        {
-          id: 'note-1',
-          number: 1
-        },
-        {
-          id: 'note-2',
-        },
-      ]
-    },
-    {
-      id: 'string-2',
-      notes: [
-        {
-          id: 'note-1',
-          number: 1
-        },
-        {
-          id: 'note-2',
-        },
-      ]
-    }
-  ]
+  strungs: Array(6).fill({}).map((_, i) => ({
+    id: `string-${i}`,
+    notes: Array(6).fill({}).map((_, n) => ({
+      id: `string-${i}note-${n}`,
+    }))
+  }))
 }
 
 const buildClasses = (list: unknown[]) => list.filter(Boolean).join(' ');
@@ -102,9 +82,13 @@ const Riff = () => {
         </div>
       )
     }
-    <form
-      onSubmit={(e) => e.preventDefault()}
+    <p
+      style={{ margin: 'auto' }}
     >
+      <button
+        style={{ padding: '0.5rem 1rem' }}
+        onClick={() => setPasteValue(pasteValue - 1)}
+      >-</button>
       <input
         type="number"
         min="0"
@@ -113,7 +97,11 @@ const Riff = () => {
         value={pasteValue}
         onChange={(e) => setPasteValue(parseInt(e.target.value, 10))}
       />
-    </form>
+      <button
+        style={{ padding: '0.5rem 1rem' }}
+        onClick={() => setPasteValue(pasteValue + 1)}
+      >+</button>
+    </p>
   </div>
 }
 
