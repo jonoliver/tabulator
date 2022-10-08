@@ -22,7 +22,7 @@ type Riff = {
 const mockState: Riff = {
   strungs: Array(6).fill({}).map((_, i) => ({
     id: `string-${i}`,
-    notes: Array(6).fill({}).map((_, n) => ({
+    notes: Array(12).fill({}).map((_, n) => ({
       id: `string-${i}note-${n}`,
     }))
   }))
@@ -70,20 +70,25 @@ const Riff = () => {
     }));
   }
 
-  return <div className={styles.riff}>
-    {
-      riff.strungs.map((strung) =>
-        <div key={strung.id} className={styles.string}>
-          {
-            strung.notes.map(note =>
-              <Note key={note.id} note={note} setNote={() => setNote(strung.id, note.id)} />
-            )
-          }
-        </div>
-      )
-    }
+  return <div>
+    <div style={{ overflowX: 'scroll' }}>
+      <div className={styles.riff}>
+        {
+          riff.strungs.map((strung) =>
+            <div key={strung.id} className={styles.string}>
+              {
+                strung.notes.map(note =>
+                  <Note key={note.id} note={note} setNote={() => setNote(strung.id, note.id)} />
+                )
+              }
+            </div>
+          )
+        }
+      </div>
+    </div>
+
     <p
-      style={{ margin: 'auto' }}
+      style={{ textAlign: 'center' }}
     >
       <button
         style={{ padding: '0.5rem 1rem' }}

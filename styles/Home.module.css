@@ -1,4 +1,8 @@
-.container {
+.title {
+  text-align: center;
+}
+
+/* .container {
   padding: 0 2rem;
 }
 
@@ -127,3 +131,5 @@
     filter: invert(1);
   }
 }
+
+*/
