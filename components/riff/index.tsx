@@ -1,29 +1,26 @@
-import { MouseEventHandler, useState } from "react";
+import { MouseEventHandler, useState, useEffect } from "react";
 import produce from "immer";
+import { useRouter } from 'next/router'
+import { stateToUrlParams, urlParamsToState } from '../../utils/url';
 import styles from './riff.module.css';
-
 type ID = string;
 
-type Fret = {
-  id: ID,
+export type Fret = {
   number?: number
 };
 
 // lol thx for overloading the term `string`, CS
-type Strung = {
-  id: ID,
+export type Strung = {
   notes: Fret[]
 };
 
-type Riff = {
+export type Riff = {
   strungs: Strung[]
 };
 
 const mockState: Riff = {
   strungs: Array(6).fill({}).map((_, i) => ({
-    id: `string-${i}`,
     notes: Array(12).fill({}).map((_, n) => ({
-      id: `string-${i}note-${n}`,
     }))
   }))
 }
@@ -57,16 +54,25 @@ const Note = ({ note, setNote }: NoteProps) => {
 const Riff = () => {
   const [riff, setRiff] = useState(mockState);
   const [pasteValue, setPasteValue] = useState(0);
-  const setNote = (strungId: ID, noteId: ID) => {
+  const router = useRouter();
+
+  useEffect(() => {
+    if (router.query.r) {
+      const riffFromQuery = urlParamsToState(router.query.r as string);
+      setRiff(riffFromQuery);
+    }
+  }, [router])
+
+  const setNote = (strungIndex: number, noteIndex: number) => {
     if (isNaN(pasteValue)) return;
 
     setRiff(produce((draft) => {
-      const note = draft.strungs
-        .find(x => x.id === strungId)?.notes
-        .find(x => x.id === noteId);
+      const note = draft.strungs[strungIndex]?.notes[noteIndex];
       if (note) {
         note.number = note.number === pasteValue ? undefined : pasteValue;
       }
+      // this doesn't seem good?
+      router.push(`?r=${stateToUrlParams(draft)}`, undefined, { shallow: true })
     }));
   }
 
@@ -74,11 +80,11 @@ const Riff = () => {
     <div style={{ overflowX: 'scroll' }}>
       <div className={styles.riff}>
         {
-          riff.strungs.map((strung) =>
-            <div key={strung.id} className={styles.string}>
+          riff.strungs.map((strung, s) =>
+            <div key={s} className={styles.string}>
               {
-                strung.notes.map(note =>
-                  <Note key={note.id} note={note} setNote={() => setNote(strung.id, note.id)} />
+                strung.notes.map((note, n) =>
+                  <Note key={n} note={note} setNote={() => setNote(s, n)} />
                 )
               }
             </div>
