@@ -1,8 +1,15 @@
 
 import type { Riff } from '../../components/riff';
 
-export const stateToUrlParams = (riff: Riff) => {
+export const riffToUrlParam = (riff: Riff) => {
   return riff.strungs.map(strung => strung.notes.map(notes => notes.number).join('.')).join('-')
+}
+
+export const stateToUrlParams = (riff: Riff) => {
+  return [
+    `r=${riffToUrlParam(riff)}`,
+    // isEdit && 'e=1',
+  ].filter(Boolean).join('&')
 }
 
 export const urlParamsToState = (param: string) => {

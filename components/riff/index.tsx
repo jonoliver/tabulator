@@ -3,7 +3,6 @@ import produce from "immer";
 import { useRouter } from 'next/router'
 import { stateToUrlParams, urlParamsToState } from '../../utils/url';
 import styles from './riff.module.css';
-type ID = string;
 
 export type Fret = {
   number?: number
@@ -40,31 +39,48 @@ type NoteProps = {
 
 const Note = ({ note, setNote }: NoteProps) => {
   const hasNote = note.number !== undefined;
-  const noteClassNames = buildClasses([styles.fret, !hasNote && styles.empty]);
+  const noteClassNames = buildClasses([styles.number, !hasNote && styles.empty]);
   return (
     <div
-      className={noteClassNames}
+      className={styles.fret}
       onClick={setNote}
     >
-      <span className={styles.number}>{note.number}</span>
+      <span className={noteClassNames}>{note.number}</span>
     </div>
   )
 }
 
+type EditButtonProps = {
+  isEdit: boolean,
+  setIsEdit(isEdit: boolean): void,
+}
+
+const EditButton = ({ isEdit, setIsEdit }: EditButtonProps) => {
+  return <button onClick={() => setIsEdit(!isEdit)}>{isEdit ? 'Done' : 'Edit'}</button>
+}
+
+const mockRiff: Riff = {
+  strungs: []
+}
+
 const Riff = () => {
   const [riff, setRiff] = useState(mockState);
+  const [isEdit, setIsEdit] = useState(true);
   const [pasteValue, setPasteValue] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
-    if (router.query.r) {
-      const riffFromQuery = urlParamsToState(router.query.r as string);
+    const query = new URLSearchParams(window.location.search);
+    const riffParam = query.get('r');
+    if (riffParam) {
+      const riffFromQuery = urlParamsToState(riffParam);
       setRiff(riffFromQuery);
+      setIsEdit(false);
     }
-  }, [router])
+  }, [])
 
   const setNote = (strungIndex: number, noteIndex: number) => {
-    if (isNaN(pasteValue)) return;
+    if (!isEdit || isNaN(pasteValue)) return;
 
     setRiff(produce((draft) => {
       const note = draft.strungs[strungIndex]?.notes[noteIndex];
@@ -72,15 +88,15 @@ const Riff = () => {
         note.number = note.number === pasteValue ? undefined : pasteValue;
       }
       // this doesn't seem good?
-      router.push(`?r=${stateToUrlParams(draft)}`, undefined, { shallow: true })
+      router.push(`?${stateToUrlParams(draft)}`, undefined, { shallow: true })
     }));
   }
 
-  return <div>
+  return <div className={isEdit ? styles.edit : ''}>
     <div style={{ overflowX: 'scroll' }}>
       <div className={styles.riff}>
         {
-          riff.strungs.map((strung, s) =>
+          riff?.strungs.map((strung, s) =>
             <div key={s} className={styles.string}>
               {
                 strung.notes.map((note, n) =>
@@ -96,22 +112,27 @@ const Riff = () => {
     <p
       style={{ textAlign: 'center' }}
     >
-      <button
-        style={{ padding: '0.5rem 1rem' }}
-        onClick={() => setPasteValue(pasteValue - 1)}
-      >-</button>
-      <input
-        type="number"
-        min="0"
-        max="25"
-        style={{ width: '5rem', padding: '0.5rem', paddingRight: '0', margin: 'auto' }}
-        value={pasteValue}
-        onChange={(e) => setPasteValue(parseInt(e.target.value, 10))}
-      />
-      <button
-        style={{ padding: '0.5rem 1rem' }}
-        onClick={() => setPasteValue(pasteValue + 1)}
-      >+</button>
+      <Show when={isEdit}>
+        <>
+          <button
+            style={{ padding: '0.5rem 1rem' }}
+            onClick={() => setPasteValue(pasteValue - 1)}
+          >-</button>
+          <input
+            type="number"
+            min="0"
+            max="25"
+            style={{ width: '5rem', padding: '0.5rem', paddingRight: '0', margin: 'auto' }}
+            value={pasteValue}
+            onChange={(e) => setPasteValue(parseInt(e.target.value, 10))}
+          />
+          <button
+            style={{ padding: '0.5rem 1rem' }}
+            onClick={() => setPasteValue(pasteValue + 1)}
+          >+</button>
+        </>
+      </Show>
+      <EditButton {...{ isEdit, setIsEdit }} />
     </p>
   </div>
 }

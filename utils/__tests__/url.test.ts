@@ -36,7 +36,7 @@ const riff: Riff = {
 }
 
 // const strungifiedRiff = '-abcz';
-const strungifiedRiff = '0-0.1.2...25';
+const strungifiedRiff = 'r=0-0.1.2...25';
 
 describe('#stateToUrlParams', () => {
   it('converts a riff object to a string for a url param', () => {
@@ -46,7 +46,7 @@ describe('#stateToUrlParams', () => {
 
 describe('#stateToUrlParams', () => {
   it('converts a string from a url param to a riff', () => {
-    expect((urlParamsToState(strungifiedRiff))).toMatchObject(
+    expect((urlParamsToState('0-0.1.2...25'))).toMatchObject(
       expect.objectContaining({
         strungs: expect.objectContaining(riff.strungs)
       })
