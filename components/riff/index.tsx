@@ -98,16 +98,34 @@ const Riff = () => {
   const truncatedRiff = truncateRiff(mergedRiff);
   const renderRiff: Riff = isEdit ? mergedRiff : truncatedRiff;
 
-  useEffect(() => {
+  const setStateFromQueryString = (callback = () => { }) => {
     const query = new URLSearchParams(window.location.search);
     const riffParam = query.get('r');
     if (riffParam) {
       const riffFromQuery = urlParamsToState(riffParam);
       setRiff(riffFromQuery);
-      setIsEdit(false);
+      callback();
     }
+  }
+
+  // on initial pageload
+  useEffect(() => {
+    setStateFromQueryString(() => setIsEdit(false));
   }, [])
 
+  // on back/forward navigation
+  useEffect(() => {
+    router.beforePopState(({ as }) => {
+      if (as !== router.asPath) {
+        setStateFromQueryString();
+      }
+      return true;
+    });
+
+    return () => {
+      router.beforePopState(() => true);
+    };
+  }, [router]);
   const setNote = (strungIndex: number, noteIndex: number) => {
     if (!isEdit || isNaN(pasteValue)) return;
     const newRiff = produce((draft) => {
