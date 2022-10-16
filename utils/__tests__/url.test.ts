@@ -5,50 +5,208 @@ import {
 } from '../url';
 import type { Riff } from '../../components/riff';
 
-const riff: Riff = {
-  strungs: [
+
+const riff = {
+  "strungs": [
     {
-      notes: [
+      "notes": [
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
         {
-          number: 0,
+          "number": 25
+        },
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {
+          "number": 25
         },
       ]
     },
     {
-      notes: [
+      "notes": [
+      ]
+    },
+    {
+      "notes": [
+        {},
+        {},
         {
-          number: 0,
+          "number": 2
         },
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
         {
-          number: 1,
+          "number": 2
         },
+      ]
+    },
+    {
+      "notes": [
+        {},
         {
-          number: 2,
+          "number": 2
+        },
+        {},
+        {
+          "number": 2
         },
         {},
         {},
         {
-          number: 25,
+          "number": 3
+        },
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {
+          "number": 2
+        },
+        {},
+        {
+          "number": 2
+        },
+        {},
+        {},
+        {
+          "number": 3
+        },
+      ]
+    },
+    {
+      "notes": [
+        {
+          "number": 0
+        },
+        {},
+        {},
+        {},
+        {},
+        {
+          "number": 3
+        },
+        {},
+        {
+          "number": 3
+        },
+        {},
+        {},
+        {},
+        {
+          "number": 0
+        },
+        {},
+        {},
+        {
+          "number": 0
+        },
+        {},
+        {
+          "number": 0
+        },
+        {},
+        {},
+        {},
+        {},
+        {
+          "number": 3
+        },
+      ]
+    },
+    {
+      "notes": [
+        {},
+        {},
+        {},
+        {},
+        {
+          "number": 3
+        },
+        {},
+        {},
+        {},
+        {
+          "number": 0
+        },
+        {},
+        {
+          "number": 0
+        },
+        {},
+        {},
+        {
+          "number": 0
+        },
+        {},
+        {
+          "number": 0
+        },
+        {},
+        {},
+        {},
+        {},
+        {
+          "number": 3
         },
       ]
     }
   ]
 }
-
-// const strungifiedRiff = '-abcz';
-const strungifiedRiff = 'r=0-0.1.2...25';
+const strungifiedRiff = '-14z12z--2c15c-1c1c2d10c1c2d-a4d1d3a2a1a4d-4d3a1a2a1a4d';
 
 describe('#stateToUrlParams', () => {
   it('converts a riff object to a string for a url param', () => {
-    expect((stateToUrlParams(riff))).toBe(strungifiedRiff)
+    expect((stateToUrlParams(riff))).toBe(`r=${strungifiedRiff}`)
   })
 })
 
-describe('#stateToUrlParams', () => {
+describe('#urlParamsToState', () => {
   it('converts a string from a url param to a riff', () => {
-    expect((urlParamsToState('0-0.1.2...25'))).toMatchObject(
+    const state = urlParamsToState(strungifiedRiff);
+    expect((state)).toMatchObject(
       expect.objectContaining({
-        strungs: expect.objectContaining(riff.strungs)
+        strungs: expect.arrayContaining(riff.strungs)
       })
     )
   })
