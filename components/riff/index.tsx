@@ -188,7 +188,7 @@ const Riff = () => {
         <>
           <button
             style={{ padding: '0.5rem 1rem' }}
-            onClick={() => setPasteValue(pasteValue - 1)}
+            onClick={() => pasteValue > 0 && setPasteValue(pasteValue - 1)}
           >-</button>
           <input
             type="number"
