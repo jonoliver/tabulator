@@ -1,4 +1,4 @@
-import { MouseEventHandler, useState, useEffect } from "react";
+import { MouseEventHandler, useState, useEffect, useRef } from "react";
 import produce from "immer";
 import { useRouter } from 'next/router'
 import { stateToUrlParams, urlParamsToState } from '../../utils/url';
@@ -92,11 +92,13 @@ const Riff = () => {
   const [riff, setRiff] = useState(mockState);
   const [isEdit, setIsEdit] = useState(true);
   const [pasteValue, setPasteValue] = useState(0);
+  const pageLength = 40;
+  const [editModeRiffLength, setEditModeRiffLength] = useState(pageLength);
   const router = useRouter();
 
-  const mergedRiff = mergeWithEmptyRiff(riff, 50);
-  const truncatedRiff = truncateRiff(mergedRiff);
-  const renderRiff: Riff = isEdit ? mergedRiff : truncatedRiff;
+  const mergedRiff = mergeWithEmptyRiff(riff, editModeRiffLength);
+  const renderRiff: Riff = isEdit ? mergedRiff : truncateRiff(mergedRiff);
+  const hasNotes = riff.strungs.some(strung => strung.notes.some(note => note.number !== undefined))
 
   const setStateFromQueryString = (callback = () => { }) => {
     const query = new URLSearchParams(window.location.search);
@@ -107,6 +109,25 @@ const Riff = () => {
       callback();
     }
   }
+
+  const scrollAreaRef = useRef(null);
+  const scrollTargetRef = useRef(null);
+
+  useEffect(() => {
+    let options = {
+      root: scrollAreaRef.current,
+      rootMargin: '0px',
+      threshold: 1.0
+    }
+    const intersectionCallback: IntersectionObserverCallback = ([event]) => {
+      if (isEdit && hasNotes && event.isIntersecting) {
+        setEditModeRiffLength(editModeRiffLength + pageLength)
+      }
+    };
+    let observer = new IntersectionObserver(intersectionCallback, options);
+    observer.observe(scrollTargetRef.current as unknown as Element)
+    return () => observer.unobserve(scrollTargetRef.current as unknown as Element)
+  }, [isEdit, hasNotes, editModeRiffLength])
 
   // on initial pageload
   useEffect(() => {
@@ -126,6 +147,7 @@ const Riff = () => {
       router.beforePopState(() => true);
     };
   }, [router]);
+
   const setNote = (strungIndex: number, noteIndex: number) => {
     if (!isEdit || isNaN(pasteValue)) return;
     const newRiff = produce((draft) => {
@@ -139,7 +161,7 @@ const Riff = () => {
     setRiff(newRiff);
   }
 
-  return <div className={isEdit ? styles.edit : ''}>
+  return <div ref={scrollAreaRef} className={isEdit ? styles.edit : ''}>
     <div style={{ overflowX: 'scroll' }}>
       <div className={styles.riff}>
         {
@@ -150,6 +172,9 @@ const Riff = () => {
                   <Note key={n} note={note} setNote={() => setNote(s, n)} />
                 )
               }
+              <Show when={s === 0}>
+                <span data-id="load-more" ref={scrollTargetRef}></span>
+              </Show>
             </div>
           )
         }

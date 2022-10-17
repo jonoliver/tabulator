@@ -1,5 +1,6 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
+import { useEffect } from 'react';
 import Riff from '../components/riff';
 import styles from '../styles/Home.module.css'
 
