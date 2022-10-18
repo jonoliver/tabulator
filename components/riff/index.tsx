@@ -3,6 +3,7 @@ import produce from "immer";
 import { useRouter } from 'next/router'
 import { stateToUrlParams, urlParamsToState } from '../../utils/url';
 import styles from './riff.module.css';
+import Icon from '../icon';
 
 export type Fret = {
   number?: number
@@ -85,7 +86,11 @@ type EditButtonProps = {
 }
 
 const EditButton = ({ isEdit, setIsEdit }: EditButtonProps) => {
-  return <button onClick={() => setIsEdit(!isEdit)}>{isEdit ? 'Done' : 'Edit'}</button>
+  return <button onClick={() => setIsEdit(!isEdit)}>{
+    isEdit
+      ? <Icon id='icon--checkbox' /> // 'Done'
+      : <Icon id='icon--edit' /> // 'Edit'
+  }</button>
 }
 
 const Riff = () => {
@@ -180,16 +185,28 @@ const Riff = () => {
         }
       </div>
     </div>
-
     <p
       style={{ textAlign: 'center' }}
     >
       <Show when={isEdit}>
         <>
+          <button onClick={() => window.history.back()}>
+            <Icon id='icon--undo' />
+            {/* Undo */}
+          </button>
+          <button onClick={() => window.history.forward()}>
+            <Icon id='icon--redo' />
+            {/* Redo */}
+          </button>
+          <button onClick={() => navigator.clipboard.writeText(window.location.href)}>
+            <Icon id='icon--copy' />
+            {/* Copy */}
+          </button>
           <button
-            style={{ padding: '0.5rem 1rem' }}
             onClick={() => pasteValue > 0 && setPasteValue(pasteValue - 1)}
-          >-</button>
+          >
+            <Icon id='icon--minus' />
+          </button>
           <input
             type="number"
             min="0"
@@ -199,9 +216,10 @@ const Riff = () => {
             onChange={(e) => setPasteValue(parseInt(e.target.value, 10))}
           />
           <button
-            style={{ padding: '0.5rem 1rem' }}
             onClick={() => setPasteValue(pasteValue + 1)}
-          >+</button>
+          >
+            <Icon id='icon--plus' />
+          </button>
         </>
       </Show>
       <EditButton {...{ isEdit, setIsEdit }} />

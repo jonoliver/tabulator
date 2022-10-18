@@ -2,6 +2,7 @@ import type { NextPage } from 'next'
 import Head from 'next/head'
 import { useEffect } from 'react';
 import Riff from '../components/riff';
+import { SVG } from '../components/icon';
 import styles from '../styles/Home.module.css'
 
 const Home: NextPage = () => {
@@ -18,9 +19,7 @@ const Home: NextPage = () => {
         </h1>
         <Riff />
       </main>
-
-      <footer className={styles.footer}>
-      </footer>
+      <SVG />
     </div>
   )
 }
