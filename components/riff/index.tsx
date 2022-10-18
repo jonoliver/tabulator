@@ -80,7 +80,7 @@ const Note = ({ note, setNote }: NoteProps) => {
   )
 }
 
-type EditButtonProps = {
+interface EditButtonProps {
   isEdit: boolean,
   setIsEdit(isEdit: boolean): void,
 }
@@ -92,6 +92,57 @@ const EditButton = ({ isEdit, setIsEdit }: EditButtonProps) => {
       : <Icon id='icon--edit' /> // 'Edit'
   }</button>
 }
+
+interface EditPaneProps extends EditButtonProps {
+  pasteValue: number,
+  setPasteValue(value: number): void,
+}
+
+const EditPane = ({ isEdit, setIsEdit, pasteValue, setPasteValue }: EditPaneProps) => {
+  return (
+    <p
+      style={{ textAlign: 'center' }}
+    >
+      <Show when={isEdit}>
+        <>
+          <button onClick={() => window.history.back()}>
+            <Icon id='icon--undo' />
+            {/* Undo */}
+          </button>
+          <button onClick={() => window.history.forward()}>
+            <Icon id='icon--redo' />
+            {/* Redo */}
+          </button>
+          <button onClick={() => navigator.clipboard.writeText(window.location.href)}>
+            <Icon id='icon--copy' />
+            {/* Copy */}
+          </button>
+          <button
+            onClick={() => pasteValue > 0 && setPasteValue(pasteValue - 1)}
+          >
+            <Icon id='icon--minus' />
+          </button>
+          <input
+            type="number"
+            min="0"
+            max="25"
+            style={{ width: '5rem', padding: '0.5rem', paddingRight: '0', margin: 'auto' }}
+            value={pasteValue}
+            onChange={(e) => setPasteValue(parseInt(e.target.value, 10))}
+          />
+          <button
+            onClick={() => setPasteValue(pasteValue + 1)}
+          >
+            <Icon id='icon--plus' />
+          </button>
+        </>
+      </Show>
+      <EditButton {...{ isEdit, setIsEdit }} />
+    </p>
+
+  )
+}
+
 
 const Riff = () => {
   const [riff, setRiff] = useState(mockState);
@@ -185,45 +236,7 @@ const Riff = () => {
         }
       </div>
     </div>
-    <p
-      style={{ textAlign: 'center' }}
-    >
-      <Show when={isEdit}>
-        <>
-          <button onClick={() => window.history.back()}>
-            <Icon id='icon--undo' />
-            {/* Undo */}
-          </button>
-          <button onClick={() => window.history.forward()}>
-            <Icon id='icon--redo' />
-            {/* Redo */}
-          </button>
-          <button onClick={() => navigator.clipboard.writeText(window.location.href)}>
-            <Icon id='icon--copy' />
-            {/* Copy */}
-          </button>
-          <button
-            onClick={() => pasteValue > 0 && setPasteValue(pasteValue - 1)}
-          >
-            <Icon id='icon--minus' />
-          </button>
-          <input
-            type="number"
-            min="0"
-            max="25"
-            style={{ width: '5rem', padding: '0.5rem', paddingRight: '0', margin: 'auto' }}
-            value={pasteValue}
-            onChange={(e) => setPasteValue(parseInt(e.target.value, 10))}
-          />
-          <button
-            onClick={() => setPasteValue(pasteValue + 1)}
-          >
-            <Icon id='icon--plus' />
-          </button>
-        </>
-      </Show>
-      <EditButton {...{ isEdit, setIsEdit }} />
-    </p>
+    <EditPane {...{ isEdit, setIsEdit, pasteValue, setPasteValue }} />
   </div>
 }
 
