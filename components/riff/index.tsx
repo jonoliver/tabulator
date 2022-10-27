@@ -100,45 +100,65 @@ interface EditPaneProps extends EditButtonProps {
 
 const EditPane = ({ isEdit, setIsEdit, pasteValue, setPasteValue }: EditPaneProps) => {
   return (
-    <p
-      style={{ textAlign: 'center' }}
+    <section
+      className={styles.editControls}
     >
       <Show when={isEdit}>
         <>
-          <button onClick={() => window.history.back()}>
-            <Icon id='icon--undo' />
-            {/* Undo */}
-          </button>
-          <button onClick={() => window.history.forward()}>
-            <Icon id='icon--redo' />
-            {/* Redo */}
-          </button>
-          <button onClick={() => navigator.clipboard.writeText(window.location.href)}>
-            <Icon id='icon--copy' />
-            {/* Copy */}
-          </button>
-          <button
-            onClick={() => pasteValue > 0 && setPasteValue(pasteValue - 1)}
-          >
-            <Icon id='icon--minus' />
-          </button>
-          <input
-            type="number"
-            min="0"
-            max="25"
-            style={{ width: '5rem', padding: '0.5rem', paddingRight: '0', margin: 'auto' }}
-            value={pasteValue}
-            onChange={(e) => setPasteValue(parseInt(e.target.value, 10))}
-          />
-          <button
-            onClick={() => setPasteValue(pasteValue + 1)}
-          >
-            <Icon id='icon--plus' />
-          </button>
+          <div className={styles.editHistory}>
+            <button onClick={() => window.history.back()}>
+              <Icon id='icon--undo' />
+              {/* Undo */}
+            </button>
+            <button onClick={() => window.history.forward()}>
+              <Icon id='icon--redo' />
+              {/* Redo */}
+            </button>
+          </div>
+
+          <div className={styles.editFret}>
+            <div>
+              <button
+                onClick={() => pasteValue > 0 && setPasteValue(pasteValue - 1)}
+              >
+                <Icon id='icon--minus' />
+              </button>
+            </div>
+            <div className={styles.fretInput}>
+              <label htmlFor="fret-number">FRET</label>
+              <input
+                id="fret-number"
+                type="number"
+                min="0"
+                max="25"
+                value={pasteValue}
+                onChange={(e) => setPasteValue(parseInt(e.target.value, 10))}
+              />
+            </div>
+            <div>
+              <button
+                onClick={() => setPasteValue(pasteValue + 1)}
+              >
+                <Icon id='icon--plus' />
+              </button>
+            </div>
+          </div>
+
         </>
       </Show>
-      <EditButton {...{ isEdit, setIsEdit }} />
-    </p>
+      <div className={styles.editGeneral}>
+        <button onClick={() => {
+          if (!navigator.clipboard) return;
+          navigator.clipboard.writeText(window.location.href);
+          alert('Copied shareable link.');
+        }}>
+          <Icon id='icon--copy' />
+          {/* Copy */}
+        </button>
+        <EditButton {...{ isEdit, setIsEdit }} />
+      </div>
+
+    </section>
 
   )
 }
@@ -218,7 +238,7 @@ const Riff = () => {
   }
 
   return <div ref={scrollAreaRef} className={isEdit ? styles.edit : ''}>
-    <div style={{ overflowX: 'scroll' }}>
+    <div style={{ overflowX: 'scroll', overflowY: 'clip' }}>
       <div className={styles.riff}>
         {
           renderRiff?.strungs.map((strung, s) =>
