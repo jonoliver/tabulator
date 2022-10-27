@@ -26,11 +26,54 @@
 .fret .number {
   padding: 0.5rem;
   }
-  
+
   .fret .number:not(.empty) {
   background: #FFF;
 }
 
 .edit .fret .number.empty {
   background: radial-gradient(circle, #CCC 0.5rem, #FFF0 0.5rem);
+}
+
+.editControls {
+  display: grid;
+  grid-template-areas: 'history fret general';
+  grid-template-columns: 10rem auto 10rem;
+  grid-template-rows: 4rem;
+  justify-items: center;
+  align-items: center;
+}
+
+@media (max-width: 500px) {
+  .editControls {
+    grid-template-areas: 'fret fret' 'history general';
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.editHistory {
+  grid-area: history;
+}
+
+.editFret {
+  grid-area: fret;
+  display: flex;
+  align-items: center;
+}
+
+.editGeneral {
+  grid-area: general;
+}
+
+.fretInput {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.fretInput input {
+  margin: auto;
+  border: none;
+  font-size: 2.5rem;
+  text-align: center;
 }
