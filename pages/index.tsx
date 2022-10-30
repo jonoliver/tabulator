@@ -14,9 +14,6 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-        <h1 className={styles.title}>
-          Tabulator
-        </h1>
         <Riff />
       </main>
       <SVG />
