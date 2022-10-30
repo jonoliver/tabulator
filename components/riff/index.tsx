@@ -3,8 +3,8 @@ import produce from "immer";
 import { useRouter } from 'next/router'
 import { stateToUrlParams, urlParamsToState } from '../../utils/url';
 import styles from './riff.module.css';
+import Header from '../header';
 import Icon from '../icon';
-
 export type Fret = {
   number?: number
 };
@@ -163,7 +163,6 @@ const EditPane = ({ isEdit, setIsEdit, pasteValue, setPasteValue }: EditPaneProp
   )
 }
 
-
 const Riff = () => {
   const [riff, setRiff] = useState(mockState);
   const [isEdit, setIsEdit] = useState(true);
@@ -237,27 +236,32 @@ const Riff = () => {
     setRiff(newRiff);
   }
 
-  return <div ref={scrollAreaRef} className={isEdit ? styles.edit : ''}>
-    <div style={{ overflowX: 'scroll', overflowY: 'clip' }}>
-      <div className={styles.riff}>
-        {
-          renderRiff?.strungs.map((strung, s) =>
-            <div key={s} className={styles.string}>
-              {
-                strung.notes.map((note, n) =>
-                  <Note key={n} note={note} setNote={() => setNote(s, n)} />
-                )
-              }
-              <Show when={s === 0}>
-                <span data-id="load-more" ref={scrollTargetRef}></span>
-              </Show>
-            </div>
-          )
-        }
+  return <div>
+    <Header />
+    <div ref={scrollAreaRef} className={isEdit ? styles.edit : ''}>
+      <div style={{ overflowX: 'scroll', overflowY: 'clip' }}>
+        <div className={styles.riff}>
+          {
+            renderRiff?.strungs.map((strung, s) =>
+              <div key={s} className={styles.string}>
+                {
+                  strung.notes.map((note, n) =>
+                    <Note key={n} note={note} setNote={() => setNote(s, n)} />
+                  )
+                }
+                <Show when={s === 0}>
+                  <span data-id="load-more" ref={scrollTargetRef}></span>
+                </Show>
+              </div>
+            )
+          }
+        </div>
       </div>
     </div>
     <EditPane {...{ isEdit, setIsEdit, pasteValue, setPasteValue }} />
+
   </div>
+
 }
 
 export default Riff;
