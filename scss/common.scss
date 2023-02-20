@@ -1,0 +1,5 @@
+%constrained {
+  --minPref: 300px;
+  margin: auto;
+  width: clamp(var(--minPref), min(90vh, 90vw), 90vw);
+}

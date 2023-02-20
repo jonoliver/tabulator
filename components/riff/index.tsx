@@ -2,7 +2,7 @@ import { MouseEventHandler, useState, useEffect, useRef } from "react";
 import produce from "immer";
 import { useRouter } from 'next/router'
 import { stateToUrlParams, urlParamsToState } from '../../utils/url';
-import styles from './riff.module.css';
+import styles from './riff.module.scss';
 import Header from '../header';
 import Icon from '../icon';
 export type Fret = {
@@ -236,7 +236,7 @@ const Riff = () => {
     setRiff(newRiff);
   }
 
-  return <div>
+  return <div className={styles.container}>
     <Header />
     <div ref={scrollAreaRef} className={isEdit ? styles.edit : ''}>
       <div style={{ overflowX: 'scroll', overflowY: 'clip' }}>

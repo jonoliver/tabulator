@@ -1,9 +1,8 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import { useEffect } from 'react';
 import Riff from '../components/riff';
 import { SVG } from '../components/icon';
-import styles from '../styles/Home.module.css'
+import styles from '../styles/Home.module.scss';
 
 const Home: NextPage = () => {
   return (
@@ -13,7 +12,7 @@ const Home: NextPage = () => {
         <meta name="Tabulator" content="Tabulator" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className={styles.main}>
+      <main>
         <Riff />
       </main>
       <SVG />
