@@ -8,7 +8,8 @@ import { Show } from "../show";
 import { EditPane } from "../controls";
 
 export type Fret = {
-  number?: number
+  number?: number,
+  isSelected?: boolean,
 };
 
 // lol thx for overloading the term `string`, CS
@@ -20,12 +21,25 @@ export type Riff = {
   strungs: Strung[]
 };
 
+type Coords = {
+  strungIndex: number;
+  noteIndex: number;
+};
+
+type SelectedCoords = Coords | null;
+
 const mockState: Riff = {
   strungs: Array(6).fill({}).map((_, i) => ({
     notes: Array(12).fill({}).map((_, n) => ({
     }))
   }))
 }
+
+const setSelectedNote = (riff: Riff, coords: Coords) => produce(riff, (draft) => {
+  draft.strungs[coords.strungIndex].notes[coords.noteIndex].isSelected = true;
+  return draft;
+});
+
 
 const mergeWithEmptyRiff = (riff: Riff, notes = 12) => {
   const newRiff = {
@@ -60,32 +74,40 @@ const buildClasses = (list: unknown[]) => list.filter(Boolean).join(' ');
 
 type NoteProps = {
   note: Fret,
-  setNote: MouseEventHandler
+  onClick: MouseEventHandler
 }
 
-const Note = ({ note, setNote }: NoteProps) => {
+const Note = ({ note, onClick }: NoteProps) => {
   const hasNote = note.number !== undefined;
-  const noteClassNames = buildClasses([styles.number, !hasNote && styles.empty]);
+  const noteClassNames = buildClasses([
+    styles.number,
+    !hasNote && styles.empty,
+    note.isSelected && styles.selected
+  ]);
   return (
-    <div
-      className={styles.fret}
-      onClick={setNote}
-    >
-      <span className={noteClassNames}>{note.number}</span>
+    <div className={styles.fret} onClick={onClick}>
+      <span data-cy="note" className={noteClassNames}>
+        {note.number}
+      </span>
     </div>
-  )
+  );
 }
 
 const Riff = () => {
   const [riff, setRiff] = useState(mockState);
   const [isEdit, setIsEdit] = useState(true);
   const [pasteValue, setPasteValue] = useState(0);
+  const [selectedCoords, setSelectedCoords] = useState<SelectedCoords>(null);
+
   const pageLength = 40;
   const [editModeRiffLength, setEditModeRiffLength] = useState(pageLength);
   const router = useRouter();
 
   const mergedRiff = mergeWithEmptyRiff(riff, editModeRiffLength);
-  const renderRiff: Riff = isEdit ? mergedRiff : truncateRiff(mergedRiff);
+  const renderRiff: Riff = isEdit
+    ? selectedCoords && setSelectedNote(mergedRiff, selectedCoords) || mergedRiff
+    : truncateRiff(mergedRiff);
+
   const hasNotes = riff.strungs.some(strung => strung.notes.some(note => note.number !== undefined))
 
   const setStateFromQueryString = (callback = () => { }) => {
@@ -137,43 +159,74 @@ const Riff = () => {
   }, [router]);
 
   const setNote = (strungIndex: number, noteIndex: number) => {
-    if (!isEdit || isNaN(pasteValue)) return;
-    const newRiff = produce((draft) => {
+    if (!isEdit) return;
+
+    const wasSelected = selectedCoords?.strungIndex === strungIndex && selectedCoords.noteIndex === noteIndex;
+    const fretValue = Number( mergedRiff.strungs[strungIndex]?.notes[noteIndex]?.number);
+    const fretHasValue = !isNaN(fretValue);
+
+    setSelectedCoords(wasSelected ? null : { strungIndex, noteIndex });
+
+    if (fretHasValue) {
+      setPasteValue(fretValue)
+    }
+
+    const newNote = wasSelected
+      ? undefined
+      : fretHasValue
+        ? fretValue
+        : pasteValue; // yeah I nested the terniary, big whoop
+
+    const newRiff = produce<Riff>(mergedRiff, draft => {
       const note = draft.strungs[strungIndex]?.notes[noteIndex];
-      if (note) {
-        note.number = note.number === pasteValue ? undefined : pasteValue;
-      }
-    })(mergedRiff);
+      note.number = newNote;
+    });
     const truncatedRiff = truncateRiff(newRiff);
-    router.push(`?${stateToUrlParams(truncatedRiff)}`, undefined, { shallow: true })
+    router.push(`?${stateToUrlParams(truncatedRiff)}`, undefined, {
+      shallow: true,
+    });
     setRiff(newRiff);
   }
 
-  return <div className={styles.container}>
-    <Header />
-    <div ref={scrollAreaRef} className={isEdit ? styles.edit : ''}>
-      <div style={{ overflowX: 'scroll', overflowY: 'clip' }}>
-        <div className={styles.riff}>
-          {
-            renderRiff?.strungs.map((strung, s) =>
+  const onNoteValueChange = (fret: number) => {
+    const MIN = 0;
+    const MAX = 25;
+    fret = Math.min(MAX, isNaN(Number(fret)) ? MIN : fret);
+    setPasteValue(fret);
+    if (selectedCoords) {
+      const newRiff = produce<Riff>(mergedRiff, draft => {
+        draft.strungs[selectedCoords.strungIndex].notes[selectedCoords.noteIndex] = { number: fret };
+      });
+      const truncatedRiff = truncateRiff(newRiff);
+      router.push(`?${stateToUrlParams(truncatedRiff)}`, undefined, {
+        shallow: true,
+      });
+      setRiff(newRiff);
+    }
+  };
+
+  return (
+    <div className={styles.container}>
+      <Header />
+      <div ref={scrollAreaRef} className={isEdit ? styles.edit : ''}>
+        <div style={{ overflowX: 'scroll', overflowY: 'clip' }}>
+          <div className={styles.riff}>
+            {renderRiff?.strungs.map((strung, s) => (
               <div key={s} className={styles.string}>
-                {
-                  strung.notes.map((note, n) =>
-                    <Note key={n} note={note} setNote={() => setNote(s, n)} />
-                  )
-                }
+                {strung.notes.map((note, n) => (
+                  <Note key={n} note={note} onClick={() => setNote(s, n)} />
+                ))}
                 <Show when={s === 0}>
                   <span data-id="load-more" ref={scrollTargetRef}></span>
                 </Show>
               </div>
-            )
-          }
+            ))}
+          </div>
         </div>
       </div>
+      <EditPane {...{ isEdit, setIsEdit, pasteValue, onNoteValueChange }} />
     </div>
-    <EditPane {...{ isEdit, setIsEdit, pasteValue, setPasteValue }} />
-
-  </div>
+  );
 
 }
 
