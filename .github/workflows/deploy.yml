@@ -64,6 +64,11 @@ jobs:
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
       - name: Run Tests
         run: ${{ steps.detect-package-manager.outputs.manager }} test
+      - name: Cypress run
+        uses: cypress-io/github-action@v5
+        with:
+          build: ${{ steps.detect-package-manager.outputs.runner }} build
+          start: ${{ steps.detect-package-manager.outputs.manager }} start
       - name: Build with Next.js
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
       - name: Static HTML export with Next.js
