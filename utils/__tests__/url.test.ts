@@ -1,10 +1,5 @@
 
-import {
-  stateToUrlParams,
-  urlParamsToState,
-} from '../url';
-import type { Riff } from '../../components/riff';
-
+import { stateToUrlParams, urlParamsToState } from '../url';
 
 const riff = {
   "strungs": [

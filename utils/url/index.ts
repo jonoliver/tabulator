@@ -1,5 +1,5 @@
 
-import type { Riff } from '../../components/riff';
+import type { Riff } from '../../components/riff/types';
 
 const lowerAZ = 'abcdefghijklmnopqrstuvwxyz';
 
