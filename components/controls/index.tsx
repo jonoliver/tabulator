@@ -1,6 +1,8 @@
 import styles from './controls.module.scss';
 import Icon from '../icon';
 import { Show } from "../show";
+import type { Riff } from '../riff/types';
+import { riffToPlainText } from '../../utils/text';
 
 interface EditButtonProps {
   isEdit: boolean;
@@ -15,12 +17,14 @@ const EditButton = ({ isEdit, setIsEdit }: EditButtonProps) => {
 interface EditPaneProps extends EditButtonProps {
   pasteValue: number;
   onNoteValueChange(value: number): void;
+  riff: Riff;
 }
 export const EditPane = ({
   isEdit,
   setIsEdit,
   pasteValue,
   onNoteValueChange,
+  riff,
 }: EditPaneProps) => {
   return (
     <section className={styles.editControls}>
@@ -71,6 +75,21 @@ export const EditPane = ({
         </>
       </Show>
       <div className={styles.editGeneral}>
+        <button
+          onClick={() => {
+            const text = riffToPlainText(riff);
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'tab.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+          }}
+        >
+          {/* Export */}
+          <Icon id="icon--copy" />
+        </button>
         <button
           onClick={() => {
             if (!navigator.clipboard) return;
