@@ -8,6 +8,7 @@ A user-friendly guitar tablature editor and sharing platform built with Next.js.
 - 📱 Mobile-first design
 - 🔄 Real-time updates
 - 📤 Easy sharing
+- 📥 Export to plain text
 - 🎨 Clean, modern interface
 - ♿ Accessibility focused
 

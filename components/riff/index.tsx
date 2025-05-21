@@ -148,7 +148,7 @@ const Riff = () => {
           </div>
         </div>
       </div>
-      <EditPane {...{ isEdit, setIsEdit, pasteValue, onNoteValueChange }} />
+      <EditPane {...{ isEdit, setIsEdit, pasteValue, onNoteValueChange, riff }} />
     </div>
   );
 };
