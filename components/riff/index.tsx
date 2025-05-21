@@ -1,25 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import produce from 'immer';
-import { useRouter } from 'next/router';
-import { stateToUrlParams, urlParamsToState } from '../../utils/url';
+import { truncateRiff } from '../../utils/url';
 import styles from './riff.module.scss';
 import Header from '../header';
 import { Show } from '../show';
 import { EditPane } from '../controls';
-import { Riff, Coords, Fret, NoteProps, SelectedCoords } from './types';
-
-const mockState: Riff = {
-  strungs: Array(6)
-    .fill({})
-    .map((_, i) => ({
-      notes: Array(12)
-        .fill({})
-        .map((_, n) => ({})),
-    })),
-};
+import type { Riff, Coords, NoteProps, SelectedCoords } from './types';
+import { useQueryState } from 'hooks/use-query-state';
 
 const setSelectedNote = (riff: Riff, coords: Coords) =>
-  produce(riff, draft => {
+  produce(riff, (draft) => {
     draft.strungs[coords.strungIndex].notes[coords.noteIndex].isSelected = true;
     return draft;
   });
@@ -35,25 +25,6 @@ const mergeWithEmptyRiff = (riff: Riff, notes = 12) => {
       })),
   };
   return newRiff;
-};
-
-// thx typescript https://github.com/microsoft/TypeScript/pull/49636
-const findLastIndex = (arr: any[], condition: any) => {
-  const reverseIndex = [...arr].reverse().findIndex(condition);
-  return reverseIndex > -1 ? arr.length - reverseIndex : -1;
-};
-
-const truncateRiff = (riff: Riff): Riff => {
-  const maxNoteLength = Math.max(
-    ...riff.strungs.map(strung =>
-      findLastIndex(strung.notes, (note: Fret) => note.number !== undefined)
-    )
-  );
-
-  const strungs = riff.strungs.map(strung => ({
-    notes: strung.notes.slice(0, maxNoteLength),
-  }));
-  return { strungs };
 };
 
 const buildClasses = (list: unknown[]) => list.filter(Boolean).join(' ');
@@ -75,14 +46,13 @@ const Note = ({ note, onClick }: NoteProps) => {
 };
 
 const Riff = () => {
-  const [riff, setRiff] = useState(mockState);
   const [isEdit, setIsEdit] = useState(true);
+  const [riff, setRiff] = useQueryState(setIsEdit);
   const [pasteValue, setPasteValue] = useState(0);
   const [selectedCoords, setSelectedCoords] = useState<SelectedCoords>(null);
 
   const pageLength = 40;
   const [editModeRiffLength, setEditModeRiffLength] = useState(pageLength);
-  const router = useRouter();
 
   const mergedRiff = mergeWithEmptyRiff(riff, editModeRiffLength);
   const renderRiff: Riff = isEdit
@@ -90,19 +60,9 @@ const Riff = () => {
       mergedRiff
     : truncateRiff(mergedRiff);
 
-  const hasNotes = riff.strungs.some(strung =>
-    strung.notes.some(note => note.number !== undefined)
+  const hasNotes = riff.strungs.some((strung) =>
+    strung.notes.some((note) => note.number !== undefined)
   );
-
-  const setStateFromQueryString = (callback = () => {}) => {
-    const query = new URLSearchParams(window.location.search);
-    const riffParam = query.get('r');
-    if (riffParam) {
-      const riffFromQuery = urlParamsToState(riffParam);
-      setRiff(riffFromQuery);
-      callback();
-    }
-  };
 
   const scrollAreaRef = useRef(null);
   const scrollTargetRef = useRef(null);
@@ -123,25 +83,6 @@ const Riff = () => {
     return () =>
       observer.unobserve(scrollTargetRef.current as unknown as Element);
   }, [isEdit, hasNotes, editModeRiffLength]);
-
-  // on initial pageload
-  useEffect(() => {
-    setStateFromQueryString(() => setIsEdit(false));
-  }, []);
-
-  // on back/forward navigation
-  useEffect(() => {
-    router.beforePopState(({ as }) => {
-      if (as !== router.asPath) {
-        setStateFromQueryString();
-      }
-      return true;
-    });
-
-    return () => {
-      router.beforePopState(() => true);
-    };
-  }, [router]);
 
   const setNote = (strungIndex: number, noteIndex: number) => {
     if (!isEdit) return;
@@ -166,13 +107,9 @@ const Riff = () => {
       ? fretValue
       : pasteValue; // yeah I nested the terniary, big whoop
 
-    const newRiff = produce<Riff>(mergedRiff, draft => {
+    const newRiff = produce<Riff>(mergedRiff, (draft) => {
       const note = draft.strungs[strungIndex]?.notes[noteIndex];
       note.number = newNote;
-    });
-    const truncatedRiff = truncateRiff(newRiff);
-    router.push(`?${stateToUrlParams(truncatedRiff)}`, undefined, {
-      shallow: true,
     });
     setRiff(newRiff);
   };
@@ -183,14 +120,10 @@ const Riff = () => {
     fret = Math.min(MAX, isNaN(Number(fret)) ? MIN : fret);
     setPasteValue(fret);
     if (selectedCoords) {
-      const newRiff = produce<Riff>(mergedRiff, draft => {
+      const newRiff = produce<Riff>(mergedRiff, (draft) => {
         draft.strungs[selectedCoords.strungIndex].notes[
           selectedCoords.noteIndex
         ] = { number: fret };
-      });
-      const truncatedRiff = truncateRiff(newRiff);
-      router.push(`?${stateToUrlParams(truncatedRiff)}`, undefined, {
-        shallow: true,
       });
       setRiff(newRiff);
     }
